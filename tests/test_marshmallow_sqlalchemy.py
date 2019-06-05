@@ -12,7 +12,7 @@ from sqlalchemy.orm import sessionmaker, relationship, backref, column_property
 from sqlalchemy.dialects import postgresql
 
 import marshmallow
-from marshmallow import Schema, fields, validate, post_load, ValidationError
+from marshmallow import Schema, fields, validate, post_load, ValidationError, RAISE
 
 import pytest
 from marshmallow_sqlalchemy import (
@@ -1112,6 +1112,7 @@ class TestModelSchema:
         class SchoolSchema2(ModelSchema):
             class Meta:
                 model = models.School
+                unknown = RAISE
 
             students = field_for(models.School, "students", dump_only=True)
 
