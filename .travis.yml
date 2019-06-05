@@ -1,38 +1,32 @@
-language: python
 dist: xenial
-cache: pip
-install: travis_retry pip install -U tox
-script: tox
-jobs:
-  fast_finish: true
-  include:
-  - { python: '3.6', env: TOXENV=lint }
+language: python
+python: '3.7'
 
-  - { python: '2.7', env: TOXENV=py27-marshmallow2 }
-  - { python: '2.7', env: TOXENV=py27-lowest }
+cache:
+  pip: true
+  directories:
+    - "$HOME/.cache/pre-commit"
 
-  - { python: '3.5', env: TOXENV=py35-marshmallow2 }
-  - { python: '3.5', env: TOXENV=py35-marshmallow3 }
-
-  - { python: '3.6', env: TOXENV=py36-marshmallow2 }
-  - { python: '3.6', env: TOXENV=py36-marshmallow3 }
-
-  - { python: '3.7', env: TOXENV=py37-marshmallow2 }
-  - { python: '3.7', env: TOXENV=py37-marshmallow3 }
-
-  - { python: '3.6', env: TOXENV=docs }
-
-  - stage: PyPI Release
-    if: tag IS present
-    python: "3.6"
-    env: []
-    install: skip
-    script: skip
-    deploy:
-      provider: pypi
-      user: sloria
-      on:
-        tags: true
-      distributions: sdist bdist_wheel
-      password:
-        secure: ADzISZrLbLwb665Ax5ob7srcjI2t6rqEhhiLNxLvqNtuDSCFZOXoevpKX2Omha0HWuPDAOWbNq2rkY7BpfXArYmNQ+k0ZlvGzkrqYAG8EiwlzWcOH5BMZHI8MiQxslCu1c1H9MC5HHqOiEekpc4CNl7viNkxmzF36ZiU77y+JKM=
+before_install:
+  - pip install --upgrade pip==18.1
+  - pip install pre-commit coveralls poetry
+  - pre-commit install-hooks
+install:
+  - poetry install -v
+script:
+  - pre-commit run --all-files
+  - pytest --cov=./marshmallow_sqlalchemy
+after_success:
+  - coveralls -v
+before_deploy:
+  - poetry build -f sdist
+deploy:
+  provider: script
+  script: poetry publish -v --username $PYPI_USER --password $PYPI_PASS
+  skip_cleanup: true
+  on:
+    tags: true
+env:
+  global:
+    - secure: lGZQPlI9o6g/MYmrzZr3Xey/G2Cp2JOE0QEjoceJDts6H6uWBJgXQZhGvYFhcJNx69wYeggcSGWwEkDmWNiaksGIHjUnXvhxhz2znHOve6wdBBRpTZs70jqSSycRNUvI35jrAk3/3/Sp4gK0p02rzaCuMDuqBHphiCEaoEkTWGHyxmhDWd3AWFvUvOsmE9CyTBdOhaYf82HLlyMVOu/4LMNqa/eJLPEGib89CusypiqZOt/9xV/dIGX7fM726//x2bGk/+YKUKo4zYyqHFAQBs3lL0X0suX1yeLNutMfjzJDiaws44oaxsYK1MHjdt91fKQx1Zgfi1CkWhUaHzizrMjK3cdcb0B/8CxKX9uaUTmqhrRFbM1LxD2+tH9serc4v7rEWL2uEdyMYOMOuSeVBCOHO1LeCfRXc3L/eVepU1RPghtyoWiWFjvWUXnCNEEdECvE5Rt52qRBYr5YDDgnIYpFqmfm+JwLD5HQGlp8vSFlmpN8s5jD1ONEwZtZSpTrWBiW+W3UWKGw/8vnzul3p9dTBors2+2P6JXBzx1YA2TyNkorMOnKfQUqQHTL0UtpiQNqXHnNrsvtNcRfOKMIXejPn0ZDlTpsf+tG7VuDHpRw4XP9wr0LPx/De/zygH0JLasYv5pBwLlDAVLqgkN97tMCxd10bKFvH+1AyOS6ZWY=
+    - secure: Uo8geHtTC0u7wCb1lTwphsUM1OI1VbkwLDux/bQbt8Pfpzze91Uj5PXM9fZBL8Jd82eQe4wO8eluibkik/5cLRO8xXmcQcivY6gdYDcBPgTv8ypn9zXs9eMminUfT5PoTequtPqbC7igunTcbZOy7CtaVWONkwliBaPVHmeeyEMxwFbKYnhApQ6KtIFtlg31qk1H8IiQM1eOpF44g+g3Z+Pw8HekUnqpL2ovJsmiUsA3HoZD4ILAU1oa6XvVkm3XjCLgDw1Yau4ZhK9khpNoKy+ssHefqcaBRp3op7DkO93mS59FdUXjB6dA3+ebCCQyw0mam21U3hsx4X7kdf6XEWQQ/wUntIGTcpe6UCSJYJR/7kopGYDpMSunoFg0ikgbI/luwDeyO2YxxwW/CXaJoO9FiSPLpLUwK8poX31k+nkD6j2tY9+OF86sTZ4FgsCntKJPfGahAHKIp/E23rdfmcpWs7eiR/R9rIM8RzKivG98OeWZ9FM5eF4mri+dXPLvSL0furAIrG1kZg1ReBZVBS9lZ75JGl5cm3Ze/ARVvqWxD/hga9D2GoQRYM/qouaEDEO9odGd1HjTp+AWtpvWFOSup17sWJ7fBwn18Fg7ifN6pTD12SvroUSqnt5BS5rAaU39qPZY/qTj8DHU/kSBVaJ/jIm7a8GCpofCk4QKhqs=

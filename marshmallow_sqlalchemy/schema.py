@@ -51,7 +51,9 @@ class SchemaMeta(ma.schema.SchemaMeta):
 
     # override SchemaMeta
     @classmethod
-    def get_declared_fields(mcs, klass, cls_fields, inherited_fields, dict_cls):
+    def get_declared_fields(
+        mcs, klass, cls_fields, inherited_fields, dict_cls
+    ):
         """Updates declared fields with fields converted from the SQLAlchemy model
         passed as the `model` class Meta option.
         """
@@ -178,7 +180,11 @@ class ModelSchema(with_metaclass(ModelSchemaMeta, ma.Schema)):
         props = get_primary_keys(self.opts.model)
         filters = {prop.key: data.get(prop.key) for prop in props}
         if None not in filters.values():
-            return self.session.query(self.opts.model).filter_by(**filters).first()
+            return (
+                self.session.query(self.opts.model)
+                .filter_by(**filters)
+                .first()
+            )
         return None
 
     @ma.post_load
@@ -200,7 +206,15 @@ class ModelSchema(with_metaclass(ModelSchemaMeta, ma.Schema)):
             setattr(instance, attr, value)
         return instance
 
-    def load(self, data, session=None, instance=None, transient=False, *args, **kwargs):
+    def load(
+        self,
+        data,
+        session=None,
+        instance=None,
+        transient=False,
+        *args,
+        **kwargs
+    ):
         """Deserialize data to internal representation.
 
         :param session: Optional SQLAlchemy session.

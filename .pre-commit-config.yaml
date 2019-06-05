@@ -1,19 +1,33 @@
+
 repos:
-- repo: https://github.com/asottile/pyupgrade
-  rev: v1.16.3
-  hooks:
-  - id: pyupgrade
-- repo: https://github.com/python/black
-  rev: 19.3b0
-  hooks:
-  - id: black
-    language_version: python3
-- repo: https://gitlab.com/pycqa/flake8
-  rev: 3.7.7
-  hooks:
-  - id: flake8
-- repo: https://github.com/asottile/blacken-docs
-  rev: v0.5.0
-  hooks:
-  - id: blacken-docs
-    additional_dependencies: [black==19.3b0]
+-   repo: git://github.com/pre-commit/pre-commit-hooks
+    rev: v2.1.0
+    hooks:
+    -   id: check-merge-conflict
+    -   id: check-json
+    -   id: check-yaml
+    -   id: debug-statements
+    -   id: end-of-file-fixer
+        exclude: ^docs/.*$
+    -   id: pretty-format-json
+        args:
+        - --autofix
+    -   id: trailing-whitespace
+        exclude: README.md
+-   repo: https://github.com/asottile/pyupgrade
+    rev: v1.12.0
+    hooks:
+    -   id: pyupgrade
+-   repo: https://github.com/ambv/black
+    rev: 19.3b0
+    hooks:
+    - id: black
+      language_version: python3
+      args:
+      - -l 79
+-   repo: https://github.com/PyCQA/flake8
+    rev: 3.7.7
+    hooks:
+    -   id: flake8
+        args:
+        - --ignore=E501,E266,W503,E203

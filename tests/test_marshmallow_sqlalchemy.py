@@ -12,7 +12,14 @@ from sqlalchemy.orm import sessionmaker, relationship, backref, column_property
 from sqlalchemy.dialects import postgresql
 
 import marshmallow
-from marshmallow import Schema, fields, validate, post_load, ValidationError
+from marshmallow import (
+    Schema,
+    fields,
+    validate,
+    post_load,
+    ValidationError,
+    RAISE,
+)
 
 import pytest
 from marshmallow_sqlalchemy import (
@@ -28,12 +35,18 @@ from marshmallow_sqlalchemy import (
 from marshmallow_sqlalchemy.fields import Related, RelatedList
 
 MARSHMALLOW_VERSION_INFO = tuple(
-    [int(part) for part in marshmallow.__version__.split(".") if part.isdigit()]
+    [
+        int(part)
+        for part in marshmallow.__version__.split(".")
+        if part.isdigit()
+    ]
 )
 
 
 def unpack(return_value):
-    return return_value.data if MARSHMALLOW_VERSION_INFO[0] < 3 else return_value
+    return (
+        return_value.data if MARSHMALLOW_VERSION_INFO[0] < 3 else return_value
+    )
 
 
 def contains_validator(field, v_type):
@@ -93,7 +106,9 @@ def models(Base):
             sa.Text,
             nullable=True,
             info=dict(
-                marshmallow=dict(validate=[validate.Length(max=1000)], required=True)
+                marshmallow=dict(
+                    validate=[validate.Length(max=1000)], required=True
+                )
             ),
         )
         level = sa.Column(sa.Enum("Primary", "Secondary"))
@@ -121,7 +136,9 @@ def models(Base):
         full_name = sa.Column(sa.String(255), nullable=False, unique=True)
         dob = sa.Column(sa.Date(), nullable=True)
         date_created = sa.Column(
-            sa.DateTime, default=dt.datetime.utcnow, doc="date the student was created"
+            sa.DateTime,
+            default=dt.datetime.utcnow,
+            doc="date the student was created",
         )
 
         current_school_id = sa.Column(
@@ -153,17 +170,24 @@ def models(Base):
         )
         current_school = relationship(School, backref=backref("teachers"))
 
-        substitute = relationship("SubstituteTeacher", uselist=False, backref="teacher")
+        substitute = relationship(
+            "SubstituteTeacher", uselist=False, backref="teacher"
+        )
 
     class SubstituteTeacher(Base):
         __tablename__ = "substituteteacher"
-        id = sa.Column(sa.Integer, sa.ForeignKey("teacher.id"), primary_key=True)
+        id = sa.Column(
+            sa.Integer, sa.ForeignKey("teacher.id"), primary_key=True
+        )
 
     class Paper(Base):
         __tablename__ = "paper"
 
         satype = sa.Column(sa.String(50))
-        __mapper_args__ = {"polymorphic_identity": "paper", "polymorphic_on": satype}
+        __mapper_args__ = {
+            "polymorphic_identity": "paper",
+            "polymorphic_on": satype,
+        }
 
         id = sa.Column(sa.Integer, primary_key=True)
         name = sa.Column(sa.String, nullable=False, unique=True)
@@ -210,9 +234,13 @@ def models(Base):
         id = sa.Column(sa.Integer, primary_key=True)
         topic = sa.Column(sa.String)
         seminar_title = sa.Column(sa.String, sa.ForeignKey(Seminar.title))
-        seminar_semester = sa.Column(sa.String, sa.ForeignKey(Seminar.semester))
+        seminar_semester = sa.Column(
+            sa.String, sa.ForeignKey(Seminar.semester)
+        )
         seminar = relationship(
-            Seminar, foreign_keys=[seminar_title, seminar_semester], backref="lectures"
+            Seminar,
+            foreign_keys=[seminar_title, seminar_semester],
+            backref="lectures",
         )
         kw = relationship("Keyword", secondary=lecturekeywords_table)
         keywords = association_proxy(
@@ -318,7 +346,9 @@ def schemas(models, session):
             self.CourseSchema = CourseSchema
             self.SchoolSchema = SchoolSchema
             self.StudentSchema = StudentSchema
-            self.StudentSchemaWithCustomTypeMapping = StudentSchemaWithCustomTypeMapping
+            self.StudentSchemaWithCustomTypeMapping = (
+                StudentSchemaWithCustomTypeMapping
+            )
             self.TeacherSchema = TeacherSchema
             self.SubstituteTeacherSchema = SubstituteTeacherSchema
             self.PaperSchema = PaperSchema
@@ -395,7 +425,9 @@ class TestModelFieldConversion:
         assert "current_school_id" in student_fields2
 
     def test_overridden_with_fk(self, models):
-        graded_paper_fields = fields_for_model(models.GradedPaper, include_fk=False)
+        graded_paper_fields = fields_for_model(
+            models.GradedPaper, include_fk=False
+        )
         assert "id" in graded_paper_fields
 
     def test_info_overrides(self, models):
@@ -544,7 +576,9 @@ class TestPropToFieldClass:
 
     def test_can_pass_extra_kwargs(self):
         prop = make_property(sa.String())
-        field = property2field(prop, instance=True, description="just a string")
+        field = property2field(
+            prop, instance=True, description="just a string"
+        )
         assert field.metadata["description"] == "just a string"
 
 
@@ -560,7 +594,9 @@ class TestColumnToFieldClass:
 
     def test_can_pass_extra_kwargs(self):
         column = sa.Column(sa.String(255))
-        field = column2field(column, instance=True, description="just a string")
+        field = column2field(
+            column, instance=True, description="just a string"
+        )
         assert field.metadata["description"] == "just a string"
 
     def test_uuid_column2field(self):
@@ -569,7 +605,9 @@ class TestColumnToFieldClass:
             impl = sa.BINARY(16)
 
         column = sa.Column(UUIDType)
-        assert issubclass(column.type.python_type, uuid.UUID)  # Test against test check
+        assert issubclass(
+            column.type.python_type, uuid.UUID
+        )  # Test against test check
         assert hasattr(column.type, "length")  # Test against test check
         assert column.type.length == 16  # Test against test
         field = column2field(column, instance=True)
@@ -651,7 +689,9 @@ class TestModelSchema:
 
     @pytest.fixture()
     def student(self, models, school, session):
-        student_ = models.Student(full_name="Monty Python", current_school=school)
+        student_ = models.Student(
+            full_name="Monty Python", current_school=school
+        )
         session.add(student_)
         session.flush()
         return student_
@@ -734,7 +774,9 @@ class TestModelSchema:
 
         schema = SchoolSchema()
         assert isinstance(schema.fields, OrderedDict)
-        fields = [prop.key for prop in models.School.__mapper__.iterate_properties]
+        fields = [
+            prop.key for prop in models.School.__mapper__.iterate_properties
+        ]
         assert list(schema.fields.keys()) == fields
 
     def test_model_schema_dumping(self, schemas, student):
@@ -747,7 +789,9 @@ class TestModelSchema:
 
     def test_model_schema_loading(self, models, schemas, student, session):
         schema_kwargs = (
-            {"unknown": marshmallow.INCLUDE} if MARSHMALLOW_VERSION_INFO[0] >= 3 else {}
+            {"unknown": marshmallow.INCLUDE}
+            if MARSHMALLOW_VERSION_INFO[0] >= 3
+            else {}
         )
         schema = schemas.StudentSchema(**schema_kwargs)
         dump_data = unpack(schema.dump(student))
@@ -765,7 +809,9 @@ class TestModelSchema:
         with pytest.raises(ValidationError) as excinfo:
             schema.load(dump_data)
         err = excinfo.value
-        assert err.messages["full_name"] == ["Missing data for required field."]
+        assert err.messages["full_name"] == [
+            "Missing data for required field."
+        ]
 
     def test_model_schema_loading_custom_instance(
         self, models, schemas, student, session
@@ -779,9 +825,13 @@ class TestModelSchema:
         assert load_data.current_school == student.current_school
 
     # Regression test for https://github.com/marshmallow-code/marshmallow-sqlalchemy/issues/78
-    def test_model_schema_loading_resets_instance(self, models, schemas, student):
+    def test_model_schema_loading_resets_instance(
+        self, models, schemas, student
+    ):
         schema = schemas.StudentSchema()
-        data1 = unpack(schema.load({"full_name": "new name"}, instance=student))
+        data1 = unpack(
+            schema.load({"full_name": "new name"}, instance=student)
+        )
         assert data1.id == student.id
         assert data1.full_name == student.full_name
 
@@ -818,7 +868,9 @@ class TestModelSchema:
 
         assert load_data is lecture
 
-    def test_model_schema_compound_key_relationship_invalid_key(self, schemas, lecture):
+    def test_model_schema_compound_key_relationship_invalid_key(
+        self, schemas, lecture
+    ):
         schema = schemas.LectureSchema()
         dump_data = unpack(schema.dump(lecture))
         dump_data["seminar"] = "scalar"
@@ -920,14 +972,18 @@ class TestModelSchema:
                 model = models.School
                 sqla_session = session
 
-            students = RelatedList(Related(attribute="students"), attribute="students")
+            students = RelatedList(
+                Related(attribute="students"), attribute="students"
+            )
 
         class SchoolSchema2(ModelSchema):
             class Meta:
                 model = models.School
                 sqla_session = session
 
-            students = field_for(models.School, "students", attribute="students")
+            students = field_for(
+                models.School, "students", attribute="students"
+            )
 
         class SchoolSchema3(ModelSchema):
             class Meta:
@@ -935,7 +991,10 @@ class TestModelSchema:
                 sqla_session = session
 
             students = field_for(
-                models.School, "students", attribute="students", column="full_name"
+                models.School,
+                "students",
+                attribute="students",
+                column="full_name",
             )
 
         schema = SchoolSchema()
@@ -954,13 +1013,17 @@ class TestModelSchema:
         assert type(load_data) == models.School
         assert load_data.students == school.students
 
-    def test_dump_many_to_one_relationship(self, models, schemas, school, student):
+    def test_dump_many_to_one_relationship(
+        self, models, schemas, school, student
+    ):
         schema = schemas.SchoolSchema()
         dump_data = unpack(schema.dump(school))
 
         assert dump_data["students"] == [student.id]
 
-    def test_load_many_to_one_relationship(self, models, schemas, school, student):
+    def test_load_many_to_one_relationship(
+        self, models, schemas, school, student
+    ):
         schema = schemas.SchoolSchema()
         dump_data = unpack(schema.dump(school))
         load_data = unpack(schema.load(dump_data))
@@ -1056,6 +1119,7 @@ class TestModelSchema:
         class SchoolSchema2(ModelSchema):
             class Meta:
                 model = models.School
+                unknown = RAISE
 
             students = field_for(models.School, "students", dump_only=True)
 
@@ -1105,9 +1169,12 @@ class TestModelSchema:
         assert state.transient
 
     @pytest.mark.skipif(
-        MARSHMALLOW_VERSION_INFO[0] < 3, reason="`unknown` was added in marshmallow 3"
+        MARSHMALLOW_VERSION_INFO[0] < 3,
+        reason="`unknown` was added in marshmallow 3",
     )
-    def test_transient_load_with_unknown_include(self, models, session, school):
+    def test_transient_load_with_unknown_include(
+        self, models, session, school
+    ):
         class SchoolSchemaTransient(ModelSchema):
             class Meta:
                 model = models.School
@@ -1143,7 +1210,9 @@ class TestModelSchema:
         school_state = sa.inspect(school)
         assert school_state.transient
 
-    def test_transient_schema_with_association(self, models, student_with_teachers):
+    def test_transient_schema_with_association(
+        self, models, student_with_teachers
+    ):
         class StudentSchemaTransient(ModelSchema):
             class Meta:
                 model = models.Student
@@ -1238,7 +1307,9 @@ class TestNullForeignKey:
         assert type(load_data) == models.Teacher
         assert load_data.current_school is None
 
-    def test_a_teacher_who_is_not_a_substitute(self, models, schemas, teacher, session):
+    def test_a_teacher_who_is_not_a_substitute(
+        self, models, schemas, teacher, session
+    ):
         session.commit()
         schema = schemas.TeacherSchema()
         data = unpack(schema.dump(teacher))
@@ -1270,13 +1341,18 @@ class TestDeserializeObjectThatDNE:
                 },
             ],
         }
-        deserialized_seminar_object = unpack(seminar_schema.load(seminar_dict, session))
+        deserialized_seminar_object = unpack(
+            seminar_schema.load(seminar_dict, session)
+        )
         # Ensure both nested lecture objects weren't forgotten...
 
         assert len(deserialized_seminar_object.lectures) == 2
         # Assume that if 1 lecture has a field with the correct String value, all strings
         # were successfully deserialized in nested objects
-        assert deserialized_seminar_object.lectures[0].topic == "Intro to Ter'Angreal"
+        assert (
+            deserialized_seminar_object.lectures[0].topic
+            == "Intro to Ter'Angreal"
+        )
 
 
 class TestMarshmallowContext:
@@ -1301,7 +1377,10 @@ class TestMarshmallowContext:
         schema = SchoolWrapperSchema(context=dict(session=session))
         data = {
             "school": {"name": "one school"},
-            "schools": [{"name": "another school"}, {"name": "yet, another school"}],
+            "schools": [
+                {"name": "another school"},
+                {"name": "yet, another school"},
+            ],
         }
         result = unpack(schema.load(data))
         session.add(result["school"])
