@@ -1,25 +1,23 @@
 dist: xenial
 language: python
 python: '3.7'
-
 cache:
   pip: true
   directories:
-    - "$HOME/.cache/pre-commit"
-
+  - "$HOME/.cache/pre-commit"
 before_install:
-  - pip install --upgrade pip==18.1
-  - pip install pre-commit coveralls poetry
-  - pre-commit install-hooks
+- pip install --upgrade pip==18.1
+- pip install pre-commit coveralls poetry
+- pre-commit install-hooks
 install:
-  - poetry install -v
+- poetry install -v
 script:
-  - pre-commit run --all-files
-  - pytest --cov=./marshmallow_sqlalchemy
+- pre-commit run --all-files
+- pytest --cov=./marshmallow_sqlalchemy
 after_success:
-  - coveralls -v
+- coveralls -v
 before_deploy:
-  - poetry build -f sdist
+- poetry build -f sdist
 deploy:
   provider: script
   script: poetry publish -v --username $PYPI_USER --password $PYPI_PASS
@@ -28,5 +26,5 @@ deploy:
     tags: true
 env:
   global:
-    - secure: lGZQPlI9o6g/MYmrzZr3Xey/G2Cp2JOE0QEjoceJDts6H6uWBJgXQZhGvYFhcJNx69wYeggcSGWwEkDmWNiaksGIHjUnXvhxhz2znHOve6wdBBRpTZs70jqSSycRNUvI35jrAk3/3/Sp4gK0p02rzaCuMDuqBHphiCEaoEkTWGHyxmhDWd3AWFvUvOsmE9CyTBdOhaYf82HLlyMVOu/4LMNqa/eJLPEGib89CusypiqZOt/9xV/dIGX7fM726//x2bGk/+YKUKo4zYyqHFAQBs3lL0X0suX1yeLNutMfjzJDiaws44oaxsYK1MHjdt91fKQx1Zgfi1CkWhUaHzizrMjK3cdcb0B/8CxKX9uaUTmqhrRFbM1LxD2+tH9serc4v7rEWL2uEdyMYOMOuSeVBCOHO1LeCfRXc3L/eVepU1RPghtyoWiWFjvWUXnCNEEdECvE5Rt52qRBYr5YDDgnIYpFqmfm+JwLD5HQGlp8vSFlmpN8s5jD1ONEwZtZSpTrWBiW+W3UWKGw/8vnzul3p9dTBors2+2P6JXBzx1YA2TyNkorMOnKfQUqQHTL0UtpiQNqXHnNrsvtNcRfOKMIXejPn0ZDlTpsf+tG7VuDHpRw4XP9wr0LPx/De/zygH0JLasYv5pBwLlDAVLqgkN97tMCxd10bKFvH+1AyOS6ZWY=
-    - secure: Uo8geHtTC0u7wCb1lTwphsUM1OI1VbkwLDux/bQbt8Pfpzze91Uj5PXM9fZBL8Jd82eQe4wO8eluibkik/5cLRO8xXmcQcivY6gdYDcBPgTv8ypn9zXs9eMminUfT5PoTequtPqbC7igunTcbZOy7CtaVWONkwliBaPVHmeeyEMxwFbKYnhApQ6KtIFtlg31qk1H8IiQM1eOpF44g+g3Z+Pw8HekUnqpL2ovJsmiUsA3HoZD4ILAU1oa6XvVkm3XjCLgDw1Yau4ZhK9khpNoKy+ssHefqcaBRp3op7DkO93mS59FdUXjB6dA3+ebCCQyw0mam21U3hsx4X7kdf6XEWQQ/wUntIGTcpe6UCSJYJR/7kopGYDpMSunoFg0ikgbI/luwDeyO2YxxwW/CXaJoO9FiSPLpLUwK8poX31k+nkD6j2tY9+OF86sTZ4FgsCntKJPfGahAHKIp/E23rdfmcpWs7eiR/R9rIM8RzKivG98OeWZ9FM5eF4mri+dXPLvSL0furAIrG1kZg1ReBZVBS9lZ75JGl5cm3Ze/ARVvqWxD/hga9D2GoQRYM/qouaEDEO9odGd1HjTp+AWtpvWFOSup17sWJ7fBwn18Fg7ifN6pTD12SvroUSqnt5BS5rAaU39qPZY/qTj8DHU/kSBVaJ/jIm7a8GCpofCk4QKhqs=
+  - secure: LU6C/UGD6ZS7GzBtr4uEf4crafhgiwZBCRBnJdcwMtOihTj36skdTnhlK2mMYNM5ewt//t3m/9zbYPvHgRX2m40yFSbZPXo8IA5KlZKfQlLv0NpZ0UZqCelyWSEpVMP4/R+TCzcUl/wKQA5malDWVOJg/1E1ZDGtvhf8t+sanX8gPeRKKCXgjFhkUmkU0Pv8pei4fzytXUrHmQGgj3eIDwN7Wwyc/WBRV5E0S0R8329fzCP0SiHLFrzncMjjl+qIpM4/7VNx2J2W75QvORXC4MLugptoD4DmM7N3P72hfRl0b1H+7efyAiVsAEzvIzgcXI5528UrW8YjxI61vC1fmcklXS5S25BMKn5nagpAbyfoMrGhuhyQJ6PhtXl8coENTmBrrHgsa6jmMTWffsQvsUqCYGyq32gtWaujYRtpkq5AYZMpu3MaFxEw5GTkEv/BVSxXbaeYRv9574ei8FnMMrvuOA2D66EyAsQh7r+C8AQlFYaNy/7evfs+5iLeGqFfUKGtFIYBefs8W/9Ro8Ck5LwsV+TOfJGHijAjVlL5tKXbcN7sZ8YTQs4DpfLH3uT9lTys351EPG2nfam3gMOSJQwDemKhvyGzfRAJx8PKYRR+nIKTuj1EF9giX4jx5o0Q1hNUOsVfSvm58EbMBm9RRb6sUOMVGAJvVYiX6/WyKD8=
+  - secure: ZpUGxK5h22dGDJ1oejp0cCEbXf9BbFxJp9df51TqyHfL6L+19JRxts0rVG6wWpwsXdJYiVF0PswIjlprXMqW/z09nAeQXkda6mXxY+hZp/ssBgz8bW7bzQI74PjD277s2b9ORjEyiQExcdI6u/D/Pe6Qu/pPqT57uyJ3J0fLxLt9RbYaMtNH1kws8Bz6kx6FUJe8aSxxrzhygpcb8wswfr/8K+pJMwPzha5ZzgUtv9wXdjNiFYmtDKhp/MnFwu2Dq3+Tku51iUWJ1134ujw22zXLiefa9J+0tOAfPtZ0bZowcuakxDECwZ/38vL/OPQrf2LieM4a1UGxiDAVkFzv8tmr2obfqeGylAiZ4AAzy8bLwXmUyGVrkGW+ED+yBNuArJ3CC9tjAc9NrwW96ipN85nDRUes/s3kaSHiRr+JpAdCj4Ytplw3jgDYDu1EapAYDj28B4fEkEqvAHT74n8/8SaMcDiZohbJr+F6BDRNz4ZLUuPcL3rW+AJXWegQa0p/7DJMwtPJM+6irMDXUxySsWoPpM9Ao7xUULbISELWIJLlXekuDFcnk2qy3Dp7hHBFcAUy+9rdomFUgQNN0Q7/KupHwoWcGzDn67FLtmyvuGbIhhyu3zRqD++6C4W4ZyqreAbxXLRdVOrlLZATkStPUVR4OzakAzQ2JQ2zlDBgQVo=
