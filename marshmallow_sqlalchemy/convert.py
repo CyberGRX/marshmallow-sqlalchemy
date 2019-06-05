@@ -25,12 +25,16 @@ def _has_default(column):
 
 
 def _is_auto_increment(column):
-    return column.table is not None and column is column.table._autoincrement_column
+    return (
+        column.table is not None
+        and column is column.table._autoincrement_column
+    )
 
 
 def _postgres_array_factory(converter, data_type):
     return functools.partial(
-        fields.List, converter._get_field_class_for_data_type(data_type.item_type)
+        fields.List,
+        converter._get_field_class_for_data_type(data_type.item_type),
     )
 
 
@@ -58,7 +62,11 @@ class ModelConverter(object):
     if hasattr(sa, "JSON"):
         SQLA_TYPE_MAPPING[sa.JSON] = fields.Raw
 
-    DIRECTION_MAPPING = {"MANYTOONE": False, "MANYTOMANY": True, "ONETOMANY": True}
+    DIRECTION_MAPPING = {
+        "MANYTOONE": False,
+        "MANYTOMANY": True,
+        "ONETOMANY": True,
+    }
 
     def __init__(self, schema_cls=None):
         self.schema_cls = schema_cls
@@ -82,7 +90,9 @@ class ModelConverter(object):
         result = dict_cls()
         base_fields = base_fields or {}
         for prop in model.__mapper__.iterate_properties:
-            if self._should_exclude_field(prop, fields=fields, exclude=exclude):
+            if self._should_exclude_field(
+                prop, fields=fields, exclude=exclude
+            ):
                 # Allow marshmallow to validate and exclude the field key.
                 result[prop.key] = None
                 continue
@@ -112,7 +122,9 @@ class ModelConverter(object):
         result = dict_cls()
         base_fields = base_fields or {}
         for column in table.columns:
-            if self._should_exclude_field(column, fields=fields, exclude=exclude):
+            if self._should_exclude_field(
+                column, fields=fields, exclude=exclude
+            ):
                 # Allow marshmallow to validate and exclude the field key.
                 result[column.key] = None
                 continue
@@ -226,7 +238,9 @@ class ModelConverter(object):
         kwargs["required"] = not column.nullable and not _has_default(column)
 
         if hasattr(column.type, "enums"):
-            kwargs["validate"].append(validate.OneOf(choices=column.type.enums))
+            kwargs["validate"].append(
+                validate.OneOf(choices=column.type.enums)
+            )
 
         # Add a length validator if a max length is set on the column
         # Skip UUID columns
@@ -237,7 +251,9 @@ class ModelConverter(object):
             except (AttributeError, NotImplementedError):
                 python_type = None
             if not python_type or not issubclass(python_type, uuid.UUID):
-                kwargs["validate"].append(validate.Length(max=column.type.length))
+                kwargs["validate"].append(
+                    validate.Length(max=column.type.length)
+                )
 
         if hasattr(column.type, "scale"):
             kwargs["places"] = getattr(column.type, "scale", None)

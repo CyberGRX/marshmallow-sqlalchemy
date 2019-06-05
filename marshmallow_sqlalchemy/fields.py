@@ -12,7 +12,9 @@ def get_primary_keys(model):
     :param model: SQLAlchemy model class
     """
     mapper = model.__mapper__
-    return [mapper.get_property_by_column(column) for column in mapper.primary_key]
+    return [
+        mapper.get_property_by_column(column) for column in mapper.primary_key
+    ]
 
 
 def get_schema_for_field(field):
@@ -69,7 +71,8 @@ class Related(fields.Field):
     def related_keys(self):
         if self.columns:
             return [
-                self.related_model.__mapper__.columns[column] for column in self.columns
+                self.related_model.__mapper__.columns[column]
+                for column in self.columns
             ]
         return get_primary_keys(self.related_model)
 
@@ -84,7 +87,10 @@ class Related(fields.Field):
         return schema.transient
 
     def _serialize(self, value, attr, obj):
-        ret = {prop.key: getattr(value, prop.key, None) for prop in self.related_keys}
+        ret = {
+            prop.key: getattr(value, prop.key, None)
+            for prop in self.related_keys
+        }
         return ret if len(ret) > 1 else list(ret.values())[0]
 
     def _deserialize(self, value, *args, **kwargs):
@@ -127,7 +133,9 @@ class Related(fields.Field):
             ).one()
         else:
             # Use a faster path if the related key is the primary key.
-            result = query.get([value.get(prop.key) for prop in self.related_keys])
+            result = query.get(
+                [value.get(prop.key) for prop in self.related_keys]
+            )
             if result is None:
                 raise NoResultFound
         return result
