@@ -12,7 +12,14 @@ from sqlalchemy.orm import sessionmaker, relationship, backref, column_property
 from sqlalchemy.dialects import postgresql
 
 import marshmallow
-from marshmallow import Schema, fields, validate, post_load, ValidationError, RAISE
+from marshmallow import (
+    Schema,
+    fields,
+    validate,
+    post_load,
+    ValidationError,
+    RAISE,
+)
 
 import pytest
 from marshmallow_sqlalchemy import (
